@@ -75,7 +75,6 @@ public class DrawHTML {
         String genre = String.join(" ー＞ ", genreChain);
         template = template +"エリア　 ： "+ area + "<br>" +"ジャンル ： "+ genre + "<br>";
         for(Store store : this.stores){
-            System.out.println("real average - notation score = "+(store.getAve() - store.getNotaScoreDouble()));
             template =
             template
             + "<section class=\"item\">"
