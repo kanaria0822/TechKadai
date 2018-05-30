@@ -67,8 +67,8 @@ public class DrawHTML {
             + "</h3>"
             + "<img src=\""+ store.getImageFilePath() + "\" width=\"150\" height=\"150\" ><br>"
             + "<div class=\"score\">"
-            + "表記上の平均値 : <span class=\"notation_ave_score\">" + store.getNotaScore() + "</span><br>"
             + "実際の平均値　 : <span class=\"real_ave_score\">" + String.format("%.2f", store.getAve()) + "</span>"
+            + "表記上の平均値 : <span class=\"notation_ave_score\">" + store.getNotaScore() + "</span><br>"
             + "</div>"
             + "</section>";
         }
