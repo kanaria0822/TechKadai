@@ -12,7 +12,7 @@ public class TestUnit {
         CrawlTabe ct = new CrawlTabe(url);
         List<Store> stores = ct.run();
         
-        DrawHTML dhtml = new DrawHTML(stores);
+        DrawHTML dhtml = new DrawHTML(stores , durl.getAreaChain(), durl.getGenreChain());
         dhtml.runDrawHTML();
         
     }

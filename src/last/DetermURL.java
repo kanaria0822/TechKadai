@@ -23,8 +23,15 @@ public class DetermURL {
     private static final String END_COMMAND = "end";
     private static final String rootUrl = "https://tabelog.com/rstLst/";
     private static String nowUrl = "";
+    private static List<String> areaChain;
+    private static List<String> genreChain;
+    
+    public List<String> getAreaChain(){ return areaChain; }
+    public List<String> getGenreChain(){ return genreChain; }
 
     DetermURL(){
+        areaChain = new ArrayList<>();
+        genreChain = new ArrayList<>();
     }
     
     public String select(){
@@ -112,7 +119,7 @@ public class DetermURL {
             
             Map<String, String> prefLink = setPrefLink();
             
-            String next = extractUrlFromMap(br, prefLink, "prefecture");
+            String next = extractUrlFromMap(br, prefLink, "area");
             
             while(!next.equals(nowUrl)){
                 next = selectDetailArea(next, br);
@@ -169,6 +176,7 @@ public class DetermURL {
         
             System.out.print("select "+ display + " -> ");
             input = br.readLine();
+            System.out.println();
             
             if(END_COMMAND.equals(input)){
                 return nowUrl;
@@ -176,6 +184,11 @@ public class DetermURL {
             
             for(String key : map.keySet()){
                 if(key.contains(input)){
+                    if(display.equals("area")){
+                        areaChain.add(key);
+                    }else if(display.equals("genre")){
+                        genreChain.add(key);
+                    }
                     return map.get(key);
                 }
             }

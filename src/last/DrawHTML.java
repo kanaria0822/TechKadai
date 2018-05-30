@@ -15,15 +15,22 @@ public class DrawHTML {
     
     private final String filePath = "last.html";
     private List<Store> stores;
+    private List<String> areaChain;
+    private List<String> genreChain;
     String fullHtml;
     
     DrawHTML(List<Store> stores){
         
-        this.stores = stores;
+        this.stores = new ArrayList<>(stores);
         Collections.sort(this.stores, (e1, e2) ->
-                                    (int)((e1.getAve() - e1.getNotaScoreDouble())
-                                            - (e2.getAve() - e2.getNotaScoreDouble()))*100 );
+                         -(int)(( (e1.getAve() - e1.getNotaScoreDouble()) - (e2.getAve() - e2.getNotaScoreDouble()) ) * 100) );
         
+    }
+    
+    DrawHTML(List<Store> stores, List<String> area, List<String> genre){
+        this(stores);
+        this.areaChain = area;
+        this.genreChain = genre;
     }
     
     public void runDrawHTML(){
@@ -63,8 +70,12 @@ public class DrawHTML {
         + "</html>";
         
         String template = "";
-        template = "<h2>食べログのランキング</h2>";
+        template = "<h2>食べログ！穴場かもしれない度ランキング</h2><br>";
+        String area = String.join(" ー＞ ", areaChain);
+        String genre = String.join(" ー＞ ", genreChain);
+        template = template +"エリア　 ： "+ area + "<br>" +"ジャンル ： "+ genre + "<br>";
         for(Store store : this.stores){
+            System.out.println("real average - notation score = "+(store.getAve() - store.getNotaScoreDouble()));
             template =
             template
             + "<section class=\"item\">"
@@ -73,7 +84,7 @@ public class DrawHTML {
             + "</h3>"
             + "<img src=\""+ store.getImageFileUrl() + "\" width=\"150\" height=\"150\" ><br>"
             + "<div class=\"score\">"
-            + "実際の平均値　 : <span class=\"real_ave_score\">" + String.format("%.2f", store.getAve()) + "</span><br>"
+            + "　実際の平均値 : <span class=\"real_ave_score\">" + String.format("%.2f", store.getAve()) + "</span><br>"
             + "表記上の平均値 : <span class=\"notation_ave_score\">" + store.getNotaScore() + "</span><br>"
             + "</div>"
             + "</section>";
