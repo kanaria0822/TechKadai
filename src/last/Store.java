@@ -125,12 +125,15 @@ public class Store {
     public void print(){
         System.out.println("Name      : " + this.name);
         System.out.println("URL       : " + this.url);
+        /*
         for(Map.Entry<String, String> entry : this.eval.entrySet()){
             System.out.println("\t"+entry.getKey() + " : " + entry.getValue());
         }
+         */
         System.out.println("Average   : "+this.average);
         System.out.println("NotaScore : "+this.notaScore);
         System.out.println("Image URL : "+this.imgFileUrl);
+        System.out.println();
         
     }
     

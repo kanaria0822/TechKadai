@@ -21,19 +21,10 @@ import org.jsoup.Connection.Response;
 public class DetermURL {
     
     private static final String END_COMMAND = "end";
-    private static String nowUrl = "https://tabelog.com/rstLst/?Srt=D&SrtT=rvcn&svd=20180529&svt=1900&svps=2";
     private static final String rootUrl = "https://tabelog.com/rstLst/";
-    private String url;
-    private static List<String> history;
-    
-    public String getUrl(){ return this.url; }
-    
-    public void setUrl(String url){
-        this.url = url;
-    }
-    
+    private static String nowUrl = "";
+
     DetermURL(){
-        history = new ArrayList<>();
     }
     
     public String select(){
@@ -48,25 +39,33 @@ public class DetermURL {
             e.printStackTrace();
         }
     
-        return "";
+        System.out.println("Selected URL : " + nowUrl);
+        return nowUrl;
     }
     
     public String selectGenre(BufferedReader br){
-        
-        Map<String, String> genreMap = new HashMap<>();
-        Map<String, String> genreMap2 = new HashMap<>();
         
         try{
             
             sleepOneSec();
             Document doc = Jsoup.connect(nowUrl).get();
+            
+            checkCount(doc);
+            
             Elements elems = doc.select("dl.list-balloon__table--genre");
+            
+            Map<String, String> genreMap = new HashMap<>();
             
             for(Element elem : elems){
                 Elements eles = elem.select("li.list-balloon__text-item");
                 for(Element ele : eles){
-                    System.out.println(ele.text()+" : "+ele.select("a").attr("href"));
-                    genreMap.put(elem.text(), elem.select("a").attr("href"));
+                    String genrename = ele.text();
+                    String genreurl  = ele.select("a").attr("href");
+                    if(genreurl.isEmpty()){
+                        continue;
+                    }
+                    System.out.println(genrename + " : " + genreurl);
+                    genreMap.put(genrename, genreurl);
                 }
             }
             
@@ -78,7 +77,6 @@ public class DetermURL {
                 genre = br.readLine();
                 
                 if(genre.equals(END_COMMAND)){
-                    /* change mode */
                     return nowUrl;
                 }
                 
@@ -98,15 +96,10 @@ public class DetermURL {
                 
             }
             
-            nowUrl = genreMap.get(key);
+            String next = genreMap.get(key);
             
-            sleepOneSec();
-            doc = Jsoup.connect(nowUrl).get();
-            elems = doc.select("#js-leftnavi-genre-balloon li.list-balloon__list-item");
-            for(Element elem : elems){
-                System.out.println(elem.text()+" : "+elem.select("a").attr("href"));
-                genreMap2.put(elem.text(), elem.select("a").attr("href"));
-                
+            while(!next.equals(nowUrl)){
+                next = selectDetailGenre(next, br);
             }
             
             
@@ -117,6 +110,70 @@ public class DetermURL {
         
         return "";
         
+    }
+    
+    public String selectDetailGenre(String url, BufferedReader br){
+        
+        Map<String, String> genreMap = new HashMap<>();
+    
+        try{
+            
+            sleepOneSec();
+            Document doc = Jsoup.connect(url).get();
+            checkCount(doc);
+            nowUrl = url;
+            Elements elems = doc.select("#js-leftnavi-genre-balloon li.list-balloon__list-item");
+            for(Element elem : elems){
+                String genrename = elem.text();
+                String genreurl  = elem.select("a").attr("href");
+                if(genreurl.isEmpty()){
+                    continue;
+                }
+                System.out.println(genrename + " : " + genreurl);
+                genreMap.put(genrename, genreurl);
+            }
+            
+            /* If the genreMap is empty, you have to make new method to scrape area at here.*/
+            
+            String key  = "";
+            String genre = "";
+            while(true){
+                System.out.print("select genre -> ");
+                genre = br.readLine();
+                
+                if(genre.equals(END_COMMAND)){
+                    return nowUrl;
+                }
+                
+                for(String str : genreMap.keySet()){
+                    if(str.contains(genre)){
+                        key = str;
+                        break;
+                    }
+                }
+                
+                if(key.length()!=0){
+                    break;
+                }
+                
+                System.out.println("you missed input.");
+                System.out.println("retry.");
+                
+            }
+            
+            return genreMap.get(key);
+            
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+        
+        return "";
+    
+    }
+    
+    private void checkCount(Document doc){
+        String count = doc.select(".list-condition__count").text();
+        System.out.println("Now count : " + count);
     }
     
     public String selectRegion(BufferedReader br){
@@ -134,7 +191,6 @@ public class DetermURL {
                 area = br.readLine();
                 
                 if(area.equals(END_COMMAND)){
-                    /* change mode */
                     return nowUrl;
                 }
                 
@@ -151,7 +207,7 @@ public class DetermURL {
             
             
             while(!next.equals(nowUrl)){
-                next = selectUrl(next, br);
+                next = selectDetailArea(next, br);
             }
             
         }catch(IOException e){
@@ -166,7 +222,7 @@ public class DetermURL {
     }
     
     
-    private String selectUrl(String url, BufferedReader br){
+    private String selectDetailArea(String url, BufferedReader br){
         
         Map<String, String> region = new HashMap<>();
         
@@ -174,6 +230,7 @@ public class DetermURL {
             
             sleepOneSec();
             Document doc = Jsoup.connect(url).get();
+            checkCount(doc);
             nowUrl = url;
             
             Elements elems = doc.select("#tabs-panel-balloon-pref-area li.list-balloon__list-item");
@@ -190,7 +247,6 @@ public class DetermURL {
                 area = br.readLine();
                 
                 if(area.equals(END_COMMAND)){
-                    /* change mode */
                     return nowUrl;
                 }
                 
@@ -229,15 +285,16 @@ public class DetermURL {
         try{
             
             sleepOneSec();
-            String conUrl = rootUrl;
-            Document doc = Jsoup.connect(conUrl).get();
-            history.add(conUrl);
+            Document doc = Jsoup.connect(rootUrl).get();
+            nowUrl = rootUrl;
             
             Elements prefs = doc.select("a.list-balloon__recommend-target");
             for(Element elem : prefs){
                 if(!elem.toString().contains("rstLst")){
-                    System.out.println("pref -> link : "+elem.text()+" -> "+elem.attr("href"));
-                    prefLink.put(elem.text(), elem.attr("href"));
+                    String pref = elem.text();
+                    String link = elem.attr("href");
+                    System.out.println(pref+" : "+link);
+                    prefLink.put(pref, link);
                 }
                 
             }

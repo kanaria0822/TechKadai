@@ -31,7 +31,7 @@ public class CrawlTabe {
         this.baseUrl = url;
     }
     
-    public void run(){
+    public List<Store> run(){
         
         List<Store> stores = extractStoresUrlListFrom(this.baseUrl);
         
@@ -41,8 +41,9 @@ public class CrawlTabe {
             scrapeStorePage(store);
         }
         
-        DrawHTML dhtml = new DrawHTML(stores);
-        dhtml.runDrawHTML();
+        return stores;
+        
+        
     
     }
     
