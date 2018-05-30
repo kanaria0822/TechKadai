@@ -32,14 +32,15 @@ public class DetermURL {
         try(InputStreamReader isr = new InputStreamReader(System.in);
             BufferedReader br = new BufferedReader(isr);){
             
-            selectRegion(br);
+            selectArea(br);
             selectGenre(br);
             
         }catch(IOException e){
             e.printStackTrace();
         }
     
-        System.out.println("Selected URL : " + nowUrl);
+        System.out.println("Selected URL : " + nowUrl + "\n");
+        
         return nowUrl;
     }
     
@@ -52,56 +53,17 @@ public class DetermURL {
             
             checkCount(doc);
             
-            Elements elems = doc.select("dl.list-balloon__table--genre");
-            
             Map<String, String> genreMap = new HashMap<>();
             
-            for(Element elem : elems){
-                Elements eles = elem.select("li.list-balloon__text-item");
-                for(Element ele : eles){
-                    String genrename = ele.text();
-                    String genreurl  = ele.select("a").attr("href");
-                    if(genreurl.isEmpty()){
-                        continue;
-                    }
-                    System.out.println(genrename + " : " + genreurl);
-                    genreMap.put(genrename, genreurl);
-                }
-            }
+            Elements elems = doc.select("li.list-balloon__text-item");
             
-            String genre = "";
-            String key = "";
+            setElemsToNameAndLinkMap(elems, genreMap);
             
-            while(true){
-                System.out.print("select genre -> ");
-                genre = br.readLine();
-                
-                if(genre.equals(END_COMMAND)){
-                    return nowUrl;
-                }
-                
-                for(String str : genreMap.keySet()){
-                    if(str.contains(genre)){
-                        key = str;
-                        break;
-                    }
-                }
-                
-                if(key.length()!=0){
-                    break;
-                }
-                
-                System.out.println("you missed input.");
-                System.out.println("retry.");
-                
-            }
-            
-            String next = genreMap.get(key);
+            String next = extractUrlFromMap(br, genreMap, "genre");
             
             while(!next.equals(nowUrl)){
                 next = selectDetailGenre(next, br);
             }
-            
             
             
         }catch(IOException e){
@@ -114,54 +76,22 @@ public class DetermURL {
     
     public String selectDetailGenre(String url, BufferedReader br){
         
-        Map<String, String> genreMap = new HashMap<>();
-    
         try{
             
             sleepOneSec();
             Document doc = Jsoup.connect(url).get();
-            checkCount(doc);
             nowUrl = url;
+            
+            checkCount(doc);
+            
+            
             Elements elems = doc.select("#js-leftnavi-genre-balloon li.list-balloon__list-item");
-            for(Element elem : elems){
-                String genrename = elem.text();
-                String genreurl  = elem.select("a").attr("href");
-                if(genreurl.isEmpty()){
-                    continue;
-                }
-                System.out.println(genrename + " : " + genreurl);
-                genreMap.put(genrename, genreurl);
-            }
             
-            /* If the genreMap is empty, you have to make new method to scrape area at here.*/
+            Map<String, String> genreMap = new HashMap<>();
             
-            String key  = "";
-            String genre = "";
-            while(true){
-                System.out.print("select genre -> ");
-                genre = br.readLine();
-                
-                if(genre.equals(END_COMMAND)){
-                    return nowUrl;
-                }
-                
-                for(String str : genreMap.keySet()){
-                    if(str.contains(genre)){
-                        key = str;
-                        break;
-                    }
-                }
-                
-                if(key.length()!=0){
-                    break;
-                }
-                
-                System.out.println("you missed input.");
-                System.out.println("retry.");
-                
-            }
+            setElemsToNameAndLinkMap(elems, genreMap);
             
-            return genreMap.get(key);
+            return extractUrlFromMap(br, genreMap, "genre");
             
         }catch(IOException e){
             e.printStackTrace();
@@ -176,35 +106,13 @@ public class DetermURL {
         System.out.println("Now count : " + count);
     }
     
-    public String selectRegion(BufferedReader br){
-        
-        /* you mustn't select KYOTO!!! */
-        
-        Map<String, String> prefLink = setPrefLink();
-        String area = "";
+    public String selectArea(BufferedReader br){
         
         try{
             
+            Map<String, String> prefLink = setPrefLink();
             
-            while(true){
-                System.out.print("select prefecture -> ");
-                area = br.readLine();
-                
-                if(area.equals(END_COMMAND)){
-                    return nowUrl;
-                }
-                
-                if(prefLink.containsKey(area)){
-                    break;
-                }
-                
-                System.out.println("you missed input.");
-                System.out.println("retry.");
-                
-            }
-            
-            String next = prefLink.get(area);
-            
+            String next = extractUrlFromMap(br, prefLink, "prefecture");
             
             while(!next.equals(nowUrl)){
                 next = selectDetailArea(next, br);
@@ -214,9 +122,7 @@ public class DetermURL {
             e.printStackTrace();
         }
         
-        
-        
-        System.out.println("selected URL : " + nowUrl);
+        System.out.println("selected URL : " + nowUrl + "\n");
         
         return nowUrl;
     }
@@ -224,50 +130,26 @@ public class DetermURL {
     
     private String selectDetailArea(String url, BufferedReader br){
         
-        Map<String, String> region = new HashMap<>();
-        
         try{
             
             sleepOneSec();
             Document doc = Jsoup.connect(url).get();
+            
             checkCount(doc);
             nowUrl = url;
             
+            Map<String, String> region = new HashMap<>();
+            
             Elements elems = doc.select("#tabs-panel-balloon-pref-area li.list-balloon__list-item");
-            for(Element elem : elems){
-                System.out.println(elem.text()+" : "+elem.select("a").attr("href"));
-                region.put(elem.text(), elem.select("a").attr("href"));
+            
+            /* when elems = 0, the 'area' element of the document has small headings */
+            if(elems.size() == 0){
+                elems = doc.select("li.list-balloon__sub-list-item");
             }
             
+            setElemsToNameAndLinkMap(elems, region);
             
-            String key  = "";
-            String area = "";
-            while(true){
-                System.out.print("select area -> ");
-                area = br.readLine();
-                
-                if(area.equals(END_COMMAND)){
-                    return nowUrl;
-                }
-                
-                for(String str : region.keySet()){
-                    if(str.contains(area)){
-                        key = str;
-                        break;
-                    }
-                }
-                
-                if(key.length()!=0){
-                    break;
-                }
-                
-                System.out.println("you missed input.");
-                System.out.println("retry.");
-                
-            }
-            
-            
-            return region.get(key);
+            return extractUrlFromMap(br, region, "area");
             
         }catch(IOException e){
             e.printStackTrace();
@@ -276,7 +158,51 @@ public class DetermURL {
         return "";
     }
     
-
+    
+    private String extractUrlFromMap(BufferedReader br, Map<String, String> map, String display)
+    throws IOException{
+        
+        String url  = "";
+        String input = "";
+        
+        while(true){
+        
+            System.out.print("select "+ display + " -> ");
+            input = br.readLine();
+            
+            if(END_COMMAND.equals(input)){
+                return nowUrl;
+            }
+            
+            for(String key : map.keySet()){
+                if(key.contains(input)){
+                    return map.get(key);
+                }
+            }
+            
+            System.out.println("you missed input.");
+            System.out.println("retry.");
+            
+        }
+    
+    }
+    
+    private void setElemsToNameAndLinkMap(Elements elems, Map<String, String> map){
+        
+        for(Element elem : elems){
+            String name = elem.text();
+            String link = elem.select("a").attr("href");
+            
+            if(link.isEmpty() || link.contains("trend")){
+                continue;
+            }
+            
+            System.out.println(name + " : " + link);
+            map.put(name, link);
+        }
+        
+    }
+    
     
     private Map<String, String> setPrefLink(){
         

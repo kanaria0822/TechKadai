@@ -2,6 +2,7 @@ package last;
 
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,6 +35,7 @@ public class Store {
     private double average;
     private String openDate;
     private String notaScore;
+    private double notaScoreDoub;
     private String imgFileUrl;
     private String imgFileName;
     private String imgFilePath;
@@ -43,6 +45,7 @@ public class Store {
     public double getAve(){ return this.average; }
     public String getOpenDate(){ return this.openDate; }
     public String getNotaScore(){ return this.notaScore; }
+    public double getNotaScoreDouble(){ return this.notaScoreDoub; }
     public String getImageFileUrl(){ return this.imgFileUrl; }
     public String getImageFileName(){ return this.imgFileName; }
     public String getImageFilePath(){ return this.imgFilePath; }
@@ -88,6 +91,11 @@ public class Store {
     
     public Store setNotaScore(String score){
         this.notaScore = score;
+        if(isNumber(score)){
+            this.notaScoreDoub = Double.parseDouble(score);
+        }else{
+            this.notaScoreDoub = 3.5;
+        }
         return this;
     }
     
@@ -96,11 +104,13 @@ public class Store {
         System.out.println("Image URL : " + this.imgFileUrl);
         setImageFileName();
         setImageFilePath();
+        /**
+         * don't have to store image file.
         try{
             storeImage();
         }catch(IOException e){
             e.printStackTrace();
-        }
+        }*/
         return this;
     }
     
@@ -175,6 +185,13 @@ public class Store {
         }catch(InterruptedException e){
             e.printStackTrace();
         }
+    }
+    
+    public boolean isNumber(String num){
+        if(Pattern.matches("^-?[0-9]*.?[0-9]+$", num)){
+            return true;
+        }
+        return false;
     }
     
 }

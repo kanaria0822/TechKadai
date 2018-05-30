@@ -1,10 +1,9 @@
 package last;
 
-import java.io.IOException;
-
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
+import java.io.IOException;
 
 import java.net.URL;
 import java.net.URLConnection;
@@ -25,33 +24,28 @@ import org.jsoup.Connection.Response;
 
 public class CrawlTabe {
     
-    private String baseUrl;
+    private static String baseUrl;
     
     CrawlTabe(String url){
-        this.baseUrl = url;
+        CrawlTabe.baseUrl = url;
     }
     
     public List<Store> run(){
         
-        List<Store> stores = extractStoresUrlListFrom(this.baseUrl);
-        
-        System.out.println("URL get!!");
+        List<Store> stores = extractStoresUrlListFrom();
         
         for(Store store : stores){
             scrapeStorePage(store);
         }
         
         return stores;
-        
-        
-    
     }
     
-    private static List<Store> extractStoresUrlListFrom(String url){
+    private static List<Store> extractStoresUrlListFrom(){
         
         List<Store> storesList = new ArrayList<>();
         
-        String nextUrl = url;
+        String nextUrl = CrawlTabe.baseUrl;
         
         do{
             

@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.io.BufferedWriter;
 import java.io.IOException;
 
+import java.util.Collections;
 
 public class DrawHTML {
     
@@ -17,7 +18,12 @@ public class DrawHTML {
     String fullHtml;
     
     DrawHTML(List<Store> stores){
+        
         this.stores = stores;
+        Collections.sort(this.stores, (e1, e2) ->
+                                    (int)((e1.getAve() - e1.getNotaScoreDouble())
+                                            - (e2.getAve() - e2.getNotaScoreDouble()))*100 );
+        
     }
     
     public void runDrawHTML(){
@@ -65,9 +71,9 @@ public class DrawHTML {
             + "<h3 class=\"title\">"
             + "<a href=\"" + store.getUrl() + "\" target=\"_blank\" >" + store.getName() + "</a>"
             + "</h3>"
-            + "<img src=\""+ store.getImageFilePath() + "\" width=\"150\" height=\"150\" ><br>"
+            + "<img src=\""+ store.getImageFileUrl() + "\" width=\"150\" height=\"150\" ><br>"
             + "<div class=\"score\">"
-            + "実際の平均値　 : <span class=\"real_ave_score\">" + String.format("%.2f", store.getAve()) + "</span>"
+            + "実際の平均値　 : <span class=\"real_ave_score\">" + String.format("%.2f", store.getAve()) + "</span><br>"
             + "表記上の平均値 : <span class=\"notation_ave_score\">" + store.getNotaScore() + "</span><br>"
             + "</div>"
             + "</section>";
