@@ -101,6 +101,12 @@ public class CrawlTabe {
             String date = doc.select("p.rstinfo-opened-date").text();
             store.setOpenDate(date);
             
+            String mapimage = doc.select("div.rstinfo-table__map img").attr("data-original");
+            store.setMapImageUrl(mapimage);
+            
+            String maplink = doc.select("div.rstinfo-table__map-link a").attr("href");
+            store.setMapLinkUrl(maplink);
+            
             Elements elems = doc.select("div.rating-box");
             for(Element ratebox : elems){
                 
