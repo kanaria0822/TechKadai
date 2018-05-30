@@ -39,6 +39,8 @@ public class Store {
     private String imgFileUrl;
     private String imgFileName;
     private String imgFilePath;
+    private String mapImageUrl;
+    private String mapLinkUrl;
     
     public String getUrl(){ return this.url; }
     public String getName(){ return this.name; }
@@ -49,6 +51,8 @@ public class Store {
     public String getImageFileUrl(){ return this.imgFileUrl; }
     public String getImageFileName(){ return this.imgFileName; }
     public String getImageFilePath(){ return this.imgFilePath; }
+    public String getMapImageUrl(){ return this.mapImageUrl; }
+    public String getMapLinkUrl(){ return this.mapLinkUrl; }
     
     public Store setUrl(String url){
         this.url = url;
@@ -129,6 +133,16 @@ public class Store {
     
     public Store setImageFilePath(){
         this.imgFilePath = "./img/" + this.imgFileName;
+        return this;
+    }
+    
+    public Store setMapImageUrl(String mapurl){
+        this.mapImageUrl = mapurl;
+        return this;
+    }
+    
+    public Store setMapLinkUrl(String maplink){
+        this.mapLinkUrl = maplink;
         return this;
     }
     
