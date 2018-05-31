@@ -21,6 +21,9 @@ import org.jsoup.Connection.Response;
 public class DetermURL {
     
     private static final String END_COMMAND = "end";
+    private static final String BACK_COMMAND = "back";
+    private static List<String> areaUrlHist;
+    private static List<String> genreUrlHist;
     private static final String rootUrl = "https://tabelog.com/rstLst/";
     private static String nowUrl = "";
     private static List<String> areaChain;
@@ -32,6 +35,8 @@ public class DetermURL {
     DetermURL(){
         areaChain = new ArrayList<>();
         genreChain = new ArrayList<>();
+        areaUrlHist = new ArrayList<>();
+        genreUrlHist = new ArrayList<>();
     }
     
     public String select(){
@@ -51,7 +56,7 @@ public class DetermURL {
         return nowUrl;
     }
     
-    public String selectGenre(BufferedReader br){
+    private String selectGenre(BufferedReader br){
         
         try{
             
@@ -81,12 +86,13 @@ public class DetermURL {
         
     }
     
-    public String selectDetailGenre(String url, BufferedReader br){
+    private String selectDetailGenre(String url, BufferedReader br){
         
         try{
             
             sleepOneSec();
             Document doc = Jsoup.connect(url).get();
+            genreUrlHist.add(url);
             nowUrl = url;
             
             checkCount(doc);
@@ -113,7 +119,7 @@ public class DetermURL {
         System.out.println("Now count : " + count);
     }
     
-    public String selectArea(BufferedReader br){
+    private String selectArea(BufferedReader br){
         
         try{
             
@@ -141,7 +147,7 @@ public class DetermURL {
             
             sleepOneSec();
             Document doc = Jsoup.connect(url).get();
-            
+            areaUrlHist.add(url);
             checkCount(doc);
             nowUrl = url;
             
@@ -182,6 +188,24 @@ public class DetermURL {
                 return nowUrl;
             }
             
+            // option
+            if(BACK_COMMAND.equals(input)){
+                if(display.equals("area")){
+                    
+                    String returl = updateListByBackComan(areaUrlHist, areaChain, "area");
+                    if(!returl.isEmpty()){
+                        return returl;
+                    }
+                    
+                }else if(display.equals("genre")){
+                    
+                    String returl = updateListByBackComan(genreUrlHist, genreChain, "genre");
+                    if(!returl.isEmpty()){
+                        return returl;
+                    }
+                }
+            }
+            
             for(String key : map.keySet()){
                 if(key.contains(input)){
                     if(display.equals("area")){
@@ -198,6 +222,26 @@ public class DetermURL {
             
         }
     
+    }
+    
+    private String updateListByBackComan(List<String> hisotory, List<String> searchPath, String way){
+    
+        int margin = 1;
+        if(way.equals("area")){
+            margin = 2;
+        }
+        int histLen = hisotory.size();
+        if(histLen > margin){
+            String returl = hisotory.get(histLen-2);
+            hisotory.remove(histLen-1);
+            hisotory.remove(histLen-2);
+            searchPath.remove(searchPath.size()-1);
+            return returl;
+        }else{
+            System.out.println("You can't back.");
+            
+        }
+        return "";
     }
     
     private void setElemsToNameAndLinkMap(Elements elems, Map<String, String> map){
@@ -225,6 +269,7 @@ public class DetermURL {
             
             sleepOneSec();
             Document doc = Jsoup.connect(rootUrl).get();
+            areaUrlHist.add(rootUrl);
             nowUrl = rootUrl;
             
             Elements prefs = doc.select("a.list-balloon__recommend-target");
